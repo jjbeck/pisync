@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 # device's IP address
 HOST = "0.0.0.0"
-PORT = 2229
+PORT = 3000
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 lock = threading.Lock()
 conn_len = {0:False,1:False,2:False,3:False}
@@ -22,6 +22,7 @@ except socket.error as msg:
     print("Bind failed. Error code:: " + str(msg[0]) + "Message" + msg[1])
     sys.exit(0)
 s.listen(10)
+cam_connected = 0
 print("Listening on port: " + str(PORT))
 
 def send_capt_1(conn1,fps):
@@ -71,6 +72,7 @@ def send_capt_4(conn1,conn2,conn3,conn4,fps):
 while 1:
     conn,addr = s.accept()
     print("Connected")
+    cam_connected +=1
     if conn_len[0] == False:
         conn_len[0]=(conn)
     elif conn_len[0] != False and conn_len[1] == False:
@@ -79,10 +81,10 @@ while 1:
         conn_len[2]=(conn)
     elif conn_len[0] != False and conn_len[1] != False and conn_len[2] != False and conn_len[3] == False:
         conn_len[3]=(conn)
-    print(conn_len)
+    print("Number of cameras connected is {}".format(cam_connected))
 
     cam = 0
-    if len(conn_len) == args.cn:
+    if cam_connected == args.cn:
         for conn in range(0,args.cn+1):
             try:
                 conn_len[conn].send('Starting Capture'.encode())
