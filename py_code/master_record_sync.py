@@ -24,6 +24,7 @@ except socket.error as msg:
     sys.exit(0)
 s.listen(10)
 cam_connected = 0
+cams_avail_record = 0
 print("Listening on port: " + str(PORT))
 
 def send_capt_1(conn1,fps):
@@ -73,6 +74,7 @@ def send_capt_4(conn1,conn2,conn3,conn4,fps):
 while 1:
     conn,addr = s.accept()
     print("Connected")
+    cam_connected += 1
     if conn_len[0] == False:
         conn_len[0]=(conn)
     elif conn_len[0] != False and conn_len[1] == False:
@@ -87,25 +89,25 @@ while 1:
         for conn in range(0,args.cn):
             try:
                 conn_len[conn].send('Starting Capture'.encode())
-                cam_connected += 1
+                cams_avail_record += 1
             except:
                 print("Send to Camera failed. Continuing")
 
-        print("Number of cameras connected is {}".format(cam_connected))
+        print("Number of cameras connected is {}".format(cams_avail_record))
 
-        if cam_connected == 1:
+        if cams_avail_record == 1:
             capt_thread = threading.Thread(target=send_capt_1,args=(conn_len[0],args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()
-        elif cam_connected == 2:
+        elif cams_avail_record == 2:
             capt_thread = threading.Thread(target=send_capt_2, args=(conn_len[0],conn_len[1], args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()
-        elif cam_connected == 3:
+        elif cams_avail_record == 3:
             capt_thread = threading.Thread(target=send_capt_3, args=(conn_len[0], conn_len[1],conn_len[2], args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()
-        elif cam_connected == 4:
+        elif cams_avail_record == 4:
             capt_thread = threading.Thread(target=send_capt_4, args=(conn_len[0], conn_len[1],conn_len[2],conn_len[3], args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()
