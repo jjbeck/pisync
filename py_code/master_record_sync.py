@@ -2,6 +2,12 @@ import socket
 import time
 import sys
 import threading
+import argparse
+
+# construct the argument parse and parse the arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("--cn","--camera-number",help="number of cameras you are recording from. Sets how many connections master waits for before starting.")
+args = parser.parse_args()
 
 # device's IP address
 HOST = "0.0.0.0"

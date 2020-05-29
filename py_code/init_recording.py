@@ -1,35 +1,39 @@
 # import the necessary packages
 from __future__ import print_function
-from image_utils_new_pipe import WebcamVideoStream
-from image_utils_new_pipe import FPS
-from image_utils_new_pipe import FFMPEG_convert
+from recording_utils import WebcamVideoStream
+from recording_utils import FPS
+from recording_utils import FFMPEG_convert
 import argparse
-import imutils
+import sys
 import cv2
-import subprocess
 import socket
-import time
 
 # construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-n", "--num-frames", type=int, default=100,
+parser = argparse.ArgumentParser()
+parser.add_argument("-n", "--num-frames", type=int, default=100,
     help="# of frames to loop over for FPS test")
-
-args = vars(ap.parse_args())
-
-
+parser.add_argument("--ip", "--ip4",help = "ip4 address to connect to master")
+parser.add_argument("--hr","--hours-to-record", type=int, default=24, help="number of hours to record")
+parser.add_argument("--tl","--transfer-location",help="hostname and location (ssh) to transfer video. Make sure you have set,"
+                                                      "up keygen before running")
+args = parser.parse_args()
 
 #Set up socket and port to listen for connection
 BUFFER_SIZE = 1024 
-host = '10.9.129.243'
+host = args.ip
 port = 2228
 client_sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
 server_address=(host,port)
-client_sock.connect((server_address))
+
+try:
+    client_sock.connect((server_address))
+except socket.error as msg:
+    print("Couldnt connect with the socket-server: %s\n terminating program" % msg)
+    print("Double check port and ip4 address")
+    sys.exit(1)
 
 
-
-
+#waits for number of camera's to connect and then triggers recording
 # created a *threaded* video stream, allow the camera sensor to warmup,
 # and start the FPS counter
 while True:
@@ -45,8 +49,8 @@ fm = FFMPEG_convert()
 i = 0
 fps.start()
 client_sock.send("cap".encode())
-while i<24:
-    while fps._numFrames < args["num_frames"]:
+while i<args.hr:
+    while fps._numFrames < args.n:
         # grab the frame from the threaded video stream and resize it
         # to have a maximum width of 400 pixels
         if client_sock.recv(BUFFER_SIZE).decode() == "capture":
@@ -64,7 +68,7 @@ while i<24:
     print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     fps = FPS()
-    vs.vid_trans()
+    vs.vid_trans(args.tl)
     i+=1
     fps.start()
     
@@ -78,10 +82,8 @@ vs.stop()
 
 """
 Nest steps:
-1) switch pipe for each new video
-2) only terminate previous ffmpeg process when old pipe is empty
+1) add arument on master for number of cameras
+2) tst code so far and then continue
 3) add try and error/exceptions to make code run smoothly
-4) implement and spice up video monitor code with cass in separat file like this with args
-5) figure out way to encode ffmpeg based on fps
 6) add arguments for resolution and fpes for ffmpeg and other aspects of code
 """

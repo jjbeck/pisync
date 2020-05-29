@@ -121,8 +121,8 @@ class WebcamVideoStream(FFMPEG_convert):
         #start new
         self.pipe = subprocess.Popen(self.command, stdin=subprocess.PIPE)
         
-    def vid_trans(self):
-        subprocess.call("rsync" + " " + "--remove-source-files" + " " + self.filename + " "  + "ccv:/users/jbecke11/data/jbecke11/nih_mice_beh/videos", shell = True)
+    def vid_trans(self,trans_location):
+        subprocess.call("rsync" + " " + "--remove-source-files" + " " + self.filename + " " + trans_location, shell = True)
 
     def update(self):
         # keep looping infinitely until the thread is stopped
