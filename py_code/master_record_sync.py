@@ -7,12 +7,13 @@ import argparse
 # construct the argument parse and parse the arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--cn","--camera-number", type=int, default=1, help="number of cameras you are recording from. Sets how many connections master waits for before starting.")
-parser.add_argument("--fps","--frames-per-second", type=int, default=30, help="Controls how fast frames are pulled from stream at each camera. Note: Max FPS will be dependent on many factors")
+parser.add_argument("--fps","--frames-per-second", type=int, default=30, help="Controls how fast frames are pulled from stream at each camera. Note: Max FPS will be dependent on many factors. Monitor FPS measure on Rasp pi so you can tweak for desired FPS")
+parser.add_argument("--port", type=int, default=3000, help="Port to form connection on")
 args = parser.parse_args()
 
 # device's IP address
 HOST = "0.0.0.0"
-PORT = 3000
+PORT = args.port
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 lock = threading.Lock()
 conn_len = {0:False,1:False,2:False,3:False}
@@ -72,7 +73,6 @@ def send_capt_4(conn1,conn2,conn3,conn4,fps):
 while 1:
     conn,addr = s.accept()
     print("Connected")
-    cam_connected +=1
     if conn_len[0] == False:
         conn_len[0]=(conn)
     elif conn_len[0] != False and conn_len[1] == False:
@@ -83,28 +83,29 @@ while 1:
         conn_len[3]=(conn)
     print("Number of cameras connected is {}".format(cam_connected))
 
-    cam = 0
     if cam_connected == args.cn:
-        for conn in range(0,args.cn+1):
+        for conn in range(0,args.cn):
             try:
                 conn_len[conn].send('Starting Capture'.encode())
+                cam_connected += 1
             except:
-                print("Send to Camera: {} failed. Continuing".format(cam))
-            cam += 1
+                print("Send to Camera failed. Continuing")
 
-        if args.cn == 1:
+        print("Number of cameras connected is {}".format(cam_connected))
+
+        if cam_connected == 1:
             capt_thread = threading.Thread(target=send_capt_1,args=(conn_len[0],args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()
-        elif args.cn == 2:
+        elif cam_connected == 2:
             capt_thread = threading.Thread(target=send_capt_2, args=(conn_len[0],conn_len[1], args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()
-        elif args.cn == 3:
+        elif cam_connected == 3:
             capt_thread = threading.Thread(target=send_capt_3, args=(conn_len[0], conn_len[1],conn_len[2], args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()
-        elif args.cn == 4:
+        elif cam_connected == 4:
             capt_thread = threading.Thread(target=send_capt_4, args=(conn_len[0], conn_len[1],conn_len[2],conn_len[3], args.fps))
             capt_thread.setDaemon(True)
             capt_thread.start()

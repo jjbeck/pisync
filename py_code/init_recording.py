@@ -16,12 +16,13 @@ parser.add_argument("--ip", "--ip4",help = "ip4 address to connect to master")
 parser.add_argument("--hr","--hours-to-record", type=int, default=24, help="number of hours to record")
 parser.add_argument("--tl","--transfer-location",help="hostname and location (ssh) to transfer video. Make sure you have set,"
                                                       "up keygen before running")
+parser.add_argument("--port", type=int, default=3000, help="Port to form connection on")
 args = parser.parse_args()
 
 #Set up socket and port to listen for connection
 BUFFER_SIZE = 1024 
 host = args.ip
-port = 3000
+port = args.port
 client_sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
 server_address=(host,port)
 
