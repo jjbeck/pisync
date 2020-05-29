@@ -24,7 +24,7 @@ except socket.error as msg:
 s.listen(5)
 print("Listening on port: " + str(PORT))
 
-
+"""
 def send_capt(conn,conn1,fps):
     while True:
         conn_capt = conn.recv(1024).decode()
@@ -37,7 +37,7 @@ def send_capt(conn,conn1,fps):
         time.sleep(1/fps)
 
     conn.close()
-
+"""
 
 while 1:
     conn,addr = s.accept()
