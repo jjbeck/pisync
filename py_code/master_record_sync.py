@@ -45,11 +45,14 @@ while 1:
     conn_len.append(conn)
 
     if len(conn_len) == args.cn:
-        for conn in range(args.cn+1):
-            conn_len[conn].send('Starting Capture'.encode())
-            capt_thread = threading.Thread(target=send_capt,args=(conn_len[conn],300))
-            capt_thread.setDaemon(True)
-            capt_thread.start()
+        conn_len[0].send('Starting Capture'.encode())
+        conn_len[1].send('Starting Capture'.encode())
+        capt_thread = threading.Thread(target=send_capt,args=(conn_len[0],conn_len[1],300))
+        #rec_thread = threading.Thread(target=send_receive, ags=(conn_len[0],conn_len[1]))
+        #rec_thread.setDaemon(True)
+        #rec_thread.start()
+        capt_thread.setDaemon(True)
+        capt_thread.start()
 
 s.close()
 
