@@ -7,6 +7,7 @@ import argparse
 # construct the argument parse and parse the arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--cn","--camera-number", type=int, default=1, help="number of cameras you are recording from. Sets how many connections master waits for before starting.")
+parser.add_argument("--fps","--frames-per-second", type=int, default=30, help="Controls how fast frames are pulled from stream at each camera. Note: Max FPS will be dependent on many factors")
 args = parser.parse_args()
 
 # device's IP address
@@ -14,77 +15,95 @@ HOST = "0.0.0.0"
 PORT = 2228
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 lock = threading.Lock()
-conn_len = []
+conn_len = {0:False,1:False,2:False,3:False}
 try:
     s.bind((HOST,PORT))
 except socket.error as msg:
     print("Bind failed. Error code:: " + str(msg[0]) + "Message" + msg[1])
     sys.exit(0)
-
 s.listen(10)
 print("Listening on port: " + str(PORT))
 
-"""
-def send_capt(conn,conn1,fps):
+def send_capt_1(conn1,fps):
     while True:
-        conn_capt = conn.recv(1024).decode()
         conn1_capt = conn1.recv(1024).decode()
-        if conn_capt == "cap" and conn1_capt == "cap":
-            conn.send("capture".encode())
+        if conn1_capt == "cap":
             conn1.send("capture".encode())
-
-
         time.sleep(1/fps)
-
     conn.close()
-"""
+
+def send_capt_2(conn1,conn2,fps):
+    while True:
+        conn1_capt = conn1.recv(1024).decode()
+        conn2_capt = conn2.recv(1024).decode()
+        if conn1_capt == "cap" and conn2_capt == "cap":
+            conn1.send("capture".encode())
+            conn2.send("capture".encode())
+        time.sleep(1/fps)
+    conn.close()
+
+def send_capt_3(conn1,conn2,conn3,fps):
+    while True:
+        conn1_capt = conn1.recv(1024).decode()
+        conn2_capt = conn2.recv(1024).decode()
+        conn3_capt = conn3.recv(1024).decode()
+        if conn1_capt == "cap" and conn2_capt == "cap" and conn3_capt == "cap":
+            conn1.send("capture".encode())
+            conn2.send("capture".encode())
+            conn3.send("capture".encode())
+        time.sleep(1/fps)
+    conn.close()
+
+def send_capt_4(conn1,conn2,conn3,conn4,fps):
+    while True:
+        conn1_capt = conn1.recv(1024).decode()
+        conn2_capt = conn2.recv(1024).decode()
+        conn3_capt = conn3.recv(1024).decode()
+        conn4_capt = conn4.recv(1024).decode()
+        if conn1_capt == "cap" and conn2_capt == "cap" and conn3_capt == "cap" and conn4_capt == "cap":
+            conn1.send("capture".encode())
+            conn2.send("capture".encode())
+            conn3.send("capture".encode())
+            conn4.send("capture".encode())
+        time.sleep(1 / fps)
+    conn.close()
 
 while 1:
     conn,addr = s.accept()
     print("Connected")
-    conn_len.append(conn)
+    if conn_len[0] == False:
+        conn_len[0]=(conn)
+    elif conn_len[0] != False and conn_len[1] == False:
+        conn_len[1]=(conn)
+    elif conn_len[0] != False and conn_len[1] != False and conn_len[2] == False:
+        conn_len[2]=(conn)
+    elif conn_len[0] != False and conn_len[1] != False and conn_len[2] != False and conn_len[3] == False:
+        conn_len[3]=(conn)
 
+    cam = 0
     if len(conn_len) == args.cn:
-        conn_len[0].send('Starting Capture'.encode())
-        conn_len[1].send('Starting Capture'.encode())
-        capt_thread = threading.Thread(target=send_capt,args=(conn_len[0],conn_len[1],300))
-        #rec_thread = threading.Thread(target=send_receive, ags=(conn_len[0],conn_len[1]))
-        #rec_thread.setDaemon(True)
-        #rec_thread.start()
-        capt_thread.setDaemon(True)
-        capt_thread.start()
+        for conn in range(0,args.cn+1):
+            try:
+                conn_len[conn].send('Starting Capture'.encode())
+            except:
+                print("Send to Camera: {} failed. Continuing".format(cam))
+            cam += 1
+
+        if args.cn == 1:
+            capt_thread = threading.Thread(target=send_capt_1,args=(conn_len[0],args.fps))
+            capt_thread.setDaemon(True)
+            capt_thread.start()
+        elif args.cn == 2:
+            capt_thread = threading.Thread(target=send_capt_2, args=(conn_len[0],conn_len[1], args.fps))
+            capt_thread.setDaemon(True)
+            capt_thread.start()
+        elif args.cn == 3:
+            capt_thread = threading.Thread(target=send_capt_3, args=(conn_len[0], conn_len[1],conn_len[2], args.fps))
+            capt_thread.setDaemon(True)
+            capt_thread.start()
+        elif args.cn == 4:
+            capt_thread = threading.Thread(target=send_capt_4, args=(conn_len[0], conn_len[1],conn_len[2],conn_len[3], args.fps))
+            capt_thread.setDaemon(True)
+            capt_thread.start()
 
 s.close()
-
-"""
-# receive 4096 bytes each time
-BUFFER_SIZE = 1024
-
-
-# create the server socket
-# TCP socket
-s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-
-# bind the socket to our local address
-s.connect((HOST,PORT))
-
-# enabling our server to accept connections
-# 5 here is the number of unaccepted connections that
-# the system will allow before refusing new connections
-frame = 1
-time.sleep(2)
-t=time.time()
-
-while True:
-    # receive using client socket, not server socket
-    s.send("capture".encode())
-    time.sleep(1/60)
-
-    frame+=1
-stop = time.time()
-print("elapsed time is {}".format(60/(stop-t)))
-# close the client socket
-
-# close the server socket
-s.close()
-"""
