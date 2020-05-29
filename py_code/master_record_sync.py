@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 # device's IP address
 HOST = "0.0.0.0"
-PORT = 2228
+PORT = 2229
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 lock = threading.Lock()
 conn_len = {0:False,1:False,2:False,3:False}
@@ -79,6 +79,7 @@ while 1:
         conn_len[2]=(conn)
     elif conn_len[0] != False and conn_len[1] != False and conn_len[2] != False and conn_len[3] == False:
         conn_len[3]=(conn)
+    print(conn_len)
 
     cam = 0
     if len(conn_len) == args.cn:

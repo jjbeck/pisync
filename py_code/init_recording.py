@@ -21,7 +21,7 @@ args = parser.parse_args()
 #Set up socket and port to listen for connection
 BUFFER_SIZE = 1024 
 host = args.ip
-port = 2228
+port = 2229
 client_sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
 server_address=(host,port)
 
