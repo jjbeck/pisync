@@ -6,7 +6,7 @@ import argparse
 
 # construct the argument parse and parse the arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("--cn","--camera-number",help="number of cameras you are recording from. Sets how many connections master waits for before starting.")
+parser.add_argument("--cn","--camera-number", type=int, default=1, help="number of cameras you are recording from. Sets how many connections master waits for before starting.")
 args = parser.parse_args()
 
 # device's IP address
@@ -21,7 +21,7 @@ except socket.error as msg:
     print("Bind failed. Error code:: " + str(msg[0]) + "Message" + msg[1])
     sys.exit(0)
 
-s.listen(5)
+s.listen(10)
 print("Listening on port: " + str(PORT))
 
 """
@@ -44,15 +44,12 @@ while 1:
     print("Connected")
     conn_len.append(conn)
 
-    if len(conn_len) == 2:
-        conn_len[0].send('Starting Capture'.encode())
-        conn_len[1].send('Starting Capture'.encode())
-        capt_thread = threading.Thread(target=send_capt,args=(conn_len[0],conn_len[1],300))
-        #rec_thread = threading.Thread(target=send_receive, ags=(conn_len[0],conn_len[1]))
-        #rec_thread.setDaemon(True)
-        #rec_thread.start()
-        capt_thread.setDaemon(True)
-        capt_thread.start()
+    if len(conn_len) == args.cn:
+        for conn in range(args.cn+1):
+            conn_len[conn].send('Starting Capture'.encode())
+            capt_thread = threading.Thread(target=send_capt,args=(conn_len[conn],300))
+            capt_thread.setDaemon(True)
+            capt_thread.start()
 
 s.close()
 
