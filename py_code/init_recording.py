@@ -86,7 +86,7 @@ while i<(round(total_frames/args.n)):
     fps.start()
     
     #time.sleep(3)
-    
+    vs.stop()
     vs.new_video()
 # do a bit of cleanup and close everything
 cv2.destroyAllWindows()

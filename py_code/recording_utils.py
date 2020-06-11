@@ -121,8 +121,7 @@ class WebcamVideoStream:
             '-r', '40',
             '-f', 'flv', 
             self.filename]
-        #stop previous process
-        self.stop()
+
         #start new
         self.pipe = subprocess.Popen(self.command, stdin=subprocess.PIPE)
         
