@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--n", "--num-frames", type=int, default=100,
     help="# of frames to loop over for FPS test")
 parser.add_argument("--ip", "--ip4",help = "ip4 address to connect to master")
-parser.add_argument("--hr","--hours-to-record", type=int, default=24, help="number of hours to record")
+parser.add_argument("--hr","--hours-to-record", type=float, default=24, help="number of hours to record. Can take floats")
 parser.add_argument("--tl","--transfer-location",help="hostname and location (ssh) to transfer video. Make sure you have set,"
                                                       "up keygen before running")
 parser.add_argument("--vs","--video-save-path",help="Directory where you want to save videos on Rasp pi")
@@ -31,6 +31,10 @@ server_address=(host,port)
 
 beg_file_name = file_organize().make_file_header()
 host_name = socket.gethostname()
+frames_an_hour = (args.n*60*60)
+total_frames = frames_an_hour*args.n
+
+
 
 try:
     client_sock.connect((server_address))
@@ -56,7 +60,7 @@ fm = FFMPEG_convert(file_header = beg_file_name,video_save_path = args.vs,host_n
 i = 0
 fps.start()
 client_sock.send("cap".encode())
-while i<args.hr:
+while i<(round(total_frames/args.n)):
     while fps._numFrames < args.n:
         # grab the frame from the threaded video stream and resize it
         # to have a maximum width of 400 pixels
