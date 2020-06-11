@@ -73,7 +73,7 @@ class FFMPEG_convert:
 
 
 class WebcamVideoStream:
-    def __init__(self, file_header,video_save_path,hostname,src=0):
+    def __init__(self, file_header,video_save_path,hostname,name,src=0):
         self.file_header = file_header
         self.video_save_path = video_save_path
         self.hostname = hostname
