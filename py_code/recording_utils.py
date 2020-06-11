@@ -72,12 +72,10 @@ class FFMPEG_convert:
         
 
 
-class WebcamVideoStream(FFMPEG_convert):
-    def __init__(self, fconv, file_header,video_save_path,hostname,src=0, name="WebcamVideoStream"):
-        self.pipe = fconv.pipe
+class WebcamVideoStream:
+    def __init__(self, file_header,video_save_path,hostname,src=0):
         self.file_header = file_header
         self.video_save_path = video_save_path
-        self.filename = fconv.filename
         self.hostname = hostname
         # initialize the video camera stream and read the first frame
         # from the stream
@@ -108,7 +106,7 @@ class WebcamVideoStream(FFMPEG_convert):
         self.hour = self.dtime.hour
         self.minute = self.dtime.minute
         self.second = self.dtime.second
-        self.filename = '{}{}_{}.{}.{}.{}.{}_{}.h264'.format(self.video_save_path,file_header,self.month,self.day,self.hour,self.minute,self.second,self.hostname)
+        self.filename = '{}{}_{}.{}.{}.{}.{}_{}.h264'.format(self.video_save_path,self.file_header,self.month,self.day,self.hour,self.minute,self.second,self.hostname)
         self.command = ['ffmpeg',
             '-f', 'rawvideo',
             '-pix_fmt', 'bgr24',

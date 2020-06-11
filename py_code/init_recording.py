@@ -54,9 +54,10 @@ while True:
 
 
 print("[INFO] sampling THREADED frames from webcam...")
-vs = WebcamVideoStream(fconv=FFMPEG_convert(),src=0,file_header = beg_file_name,video_save_path=args.vs,host_name=host_name).start()
+vs = WebcamVideoStream(src=0,file_header = beg_file_name,video_save_path=args.vs,host_name=host_name)
+vs.new_video()
+vs.start()
 fps = FPS()
-fm = FFMPEG_convert(file_header = beg_file_name,video_save_path = args.vs,host_name=host_name)
 i = 0
 fps.start()
 client_sock.send("cap".encode())
@@ -87,7 +88,6 @@ while i<(round(total_frames/args.n)):
     
     vs.new_video()
 # do a bit of cleanup and close everything
-fm.stop()
 cv2.destroyAllWindows()
 vs.stop()
 
