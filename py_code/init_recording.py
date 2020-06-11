@@ -30,6 +30,7 @@ client_sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 server_address=(host,port)
 
 beg_file_name = file_organize().make_file_header()
+print(beg_file_name)
 host_name = socket.gethostname()
 frames_an_hour = (args.n*60*60)
 total_frames = frames_an_hour*args.n
