@@ -54,7 +54,7 @@ while True:
 
 
 print("[INFO] sampling THREADED frames from webcam...")
-vs = WebcamVideoStream(src=0,file_header = beg_file_name,video_save_path=args.vs,host_name=host_name)
+vs = WebcamVideoStream(src=0,file_header = beg_file_name,video_save_path=args.vs,hostname=host_name)
 vs.new_video()
 vs.start()
 fps = FPS()
