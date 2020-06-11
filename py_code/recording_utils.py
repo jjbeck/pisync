@@ -3,6 +3,7 @@ import datetime
 from threading import Thread
 import cv2
 import subprocess
+import tkinter as tk
 
 class FPS:
     def __init__(self):
@@ -36,14 +37,19 @@ class FPS:
         return self._numFrames / self.elapsed()
     
 class FFMPEG_convert:
-    def __init__(self):
+    def __init__(self,file_header,video_save_path,hostname):
+        self.file_header = file_header
+        self.video_save_path = video_save_path
+        self.hostname=hostname
         self.dtime = datetime.datetime.now()
         self.month = self.dtime.month
         self.day = self.dtime.day
         self.hour = self.dtime.hour
         self.minute = self.dtime.minute
         self.second = self.dtime.second
-        self.filename = '/home/pi/Desktop/Mouse.{}.{}.{}.{}.{}_cam1.h264'.format(self.month,self.day,self.hour,self.minute,self.second)
+        self.filename = '{}{}_{}.{}.{}.{}.{}_{}.h264'.format(self.video_save_path,file_header,self.month,self.day,self.hour,self.minute,self.second,self.hostname)
+        print(self.filename)
+        #change hostname to unquie for each rasp pi and then have that as cam name!
         self.command = ['ffmpeg',
             '-f', 'rawvideo',
             '-pix_fmt', 'bgr24',
@@ -67,16 +73,17 @@ class FFMPEG_convert:
 
 
 class WebcamVideoStream(FFMPEG_convert):
-    def __init__(self, fconv, src=0, name="WebcamVideoStream"):
+    def __init__(self, fconv, file_header,video_save_path,hostname,src=0, name="WebcamVideoStream"):
         self.pipe = fconv.pipe
+        self.file_header = file_header
+        self.video_save_path = video_save_path
         self.filename = fconv.filename
+        self.hostname = hostname
         # initialize the video camera stream and read the first frame
         # from the stream
         self.stream = cv2.VideoCapture(src)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-
         (self.grabbed, self.frame) = self.stream.read()
 
         # initialize the thread name
@@ -94,14 +101,14 @@ class WebcamVideoStream(FFMPEG_convert):
         return self
     
     def new_video(self):
-        #register time metrics
+        #register time metric
         self.dtime = datetime.datetime.now()
         self.month = self.dtime.month
         self.day = self.dtime.day
         self.hour = self.dtime.hour
         self.minute = self.dtime.minute
         self.second = self.dtime.second
-        self.filename = '/home/pi/Desktop/Mouse.{}.{}.{}.{}.{}_cam1.h264'.format(self.month,self.day,self.hour,self.minute,self.second)
+        self.filename = '{}{}_{}.{}.{}.{}.{}_{}.h264'.format(self.video_save_path,file_header,self.month,self.day,self.hour,self.minute,self.second,self.hostname)
         self.command = ['ffmpeg',
             '-f', 'rawvideo',
             '-pix_fmt', 'bgr24',
@@ -143,5 +150,27 @@ class WebcamVideoStream(FFMPEG_convert):
         # indicate that the thread should be stopped
         self.pipe.kill()
         self.stopped = True
+
+class file_organize():
+
+    def __init__(self):
+        self.master = tk.Tk()
+        self.master.title("Enter experiment variables")
+        tk.Label(self.master, text="Enter experiment name").grid(row=0)
+        tk.Label(self.master, text="Enter condition for experiment").grid(row=1)
+        self.e1 = tk.Entry(self.master)
+        self.e2 = tk.Entry(self.master)
+        self.e1.grid(row=0,column=1)
+        self.e2.grid(row=1,column=1)
+        tk.Button(self.master,
+                  text='Show', command=self.make_file_header).grid(row=3,
+                                                                     column=1,
+                                                                     sticky=tk.W,
+                                                                     pady=4)
+        self.master.mainloop()
+    def make_file_header(self):
+        file_head = self.e1.get() + "_" + self.e2.get()
+        self.master.quit()
+        return file_head
         
         

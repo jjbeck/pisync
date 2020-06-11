@@ -3,10 +3,12 @@ from __future__ import print_function
 from recording_utils import WebcamVideoStream
 from recording_utils import FPS
 from recording_utils import FFMPEG_convert
+from recording_utils import file_organize
 import argparse
 import sys
 import cv2
 import socket
+
 
 # construct the argument parse and parse the arguments
 parser = argparse.ArgumentParser()
@@ -16,6 +18,7 @@ parser.add_argument("--ip", "--ip4",help = "ip4 address to connect to master")
 parser.add_argument("--hr","--hours-to-record", type=int, default=24, help="number of hours to record")
 parser.add_argument("--tl","--transfer-location",help="hostname and location (ssh) to transfer video. Make sure you have set,"
                                                       "up keygen before running")
+parser.add_argument("--vs","--video-save-path",help="Directory where you want to save videos on Rasp pi")
 parser.add_argument("--port", type=int, default=3000, help="Port to form connection on")
 args = parser.parse_args()
 
@@ -25,6 +28,9 @@ host = args.ip
 port = args.port
 client_sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
 server_address=(host,port)
+
+beg_file_name = file_organize().make_file_header()
+host_name = socket.gethostname()
 
 try:
     client_sock.connect((server_address))
@@ -44,9 +50,9 @@ while True:
 
 
 print("[INFO] sampling THREADED frames from webcam...")
-vs = WebcamVideoStream(fconv=FFMPEG_convert(),src=0).start()
+vs = WebcamVideoStream(fconv=FFMPEG_convert(),src=0,file_header = beg_file_name,video_save_path=args.vs,host_name=host_name).start()
 fps = FPS()
-fm = FFMPEG_convert()
+fm = FFMPEG_convert(file_header = beg_file_name,video_save_path = args.vs,host_name=host_name)
 i = 0
 fps.start()
 client_sock.send("cap".encode())

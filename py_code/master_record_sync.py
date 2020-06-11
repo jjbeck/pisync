@@ -83,7 +83,7 @@ while 1:
         conn_len[2]=(conn)
     elif conn_len[0] != False and conn_len[1] != False and conn_len[2] != False and conn_len[3] == False:
         conn_len[3]=(conn)
-    print("Number of cameras connected is {}".format(cam_connected))
+
 
     if cam_connected == args.cn:
         for conn in range(0,args.cn):
@@ -93,7 +93,7 @@ while 1:
             except:
                 print("Send to Camera failed. Continuing")
 
-        print("Number of cameras connected is {}".format(cams_avail_record))
+        print("Number of cameras available to record {}".format(cams_avail_record))
 
         if cams_avail_record == 1:
             capt_thread = threading.Thread(target=send_capt_1,args=(conn_len[0],args.fps))
